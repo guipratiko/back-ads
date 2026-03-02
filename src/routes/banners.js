@@ -63,8 +63,12 @@ router.post('/', async (req, res) => {
 
 router.patch('/:id', async (req, res) => {
   try {
-    const { imageUrl, linkUrl, alt, active, device, width, height, slides: slidesRaw } = req.body;
+    const { slotId, imageUrl, linkUrl, alt, active, device, width, height, slides: slidesRaw } = req.body;
     const update = {};
+    if (slotId) {
+      const slot = await Slot.findById(slotId);
+      if (slot) update.slotId = slotId;
+    }
     if (imageUrl !== undefined) update.imageUrl = imageUrl.trim();
     if (linkUrl !== undefined) update.linkUrl = linkUrl.trim();
     if (alt !== undefined) update.alt = alt.trim();
