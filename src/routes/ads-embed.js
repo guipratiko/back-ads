@@ -13,7 +13,7 @@ router.get('/slot/:code', async (req, res) => {
     // Preferir banner para o dispositivo; senão usar device=any
     let banner = await Banner.findOne({ slotId: slot._id, active: true, device }).sort({ createdAt: -1 }).lean();
     if (!banner) banner = await Banner.findOne({ slotId: slot._id, active: true, device: 'any' }).sort({ createdAt: -1 }).lean();
-    if (!banner) return res.status(404).json({ error: 'Nenhum banner ativo' });
+    if (!banner) return res.status(200).json({ slotCode: slot.code, banner: null });
     res.json({
       slotCode: slot.code,
       banner: { id: banner._id, imageUrl: banner.imageUrl, linkUrl: banner.linkUrl, alt: banner.alt, width: banner.width, height: banner.height },
@@ -43,6 +43,8 @@ export function serveAdsJs(req, res) {
     .then(function(data){
       if (!data || !data.banner) return;
       var b = data.banner;
+      if (b.imageUrl && b.imageUrl.indexOf('http://') === 0 && typeof location !== 'undefined' && location.protocol === 'https:') b.imageUrl = 'https://' + b.imageUrl.slice(7);
+      if (b.linkUrl && b.linkUrl.indexOf('http://') === 0 && typeof location !== 'undefined' && location.protocol === 'https:') b.linkUrl = 'https://' + b.linkUrl.slice(7);
       var a = document.createElement('a');
       a.href = b.linkUrl || '#';
       a.target = '_blank';
